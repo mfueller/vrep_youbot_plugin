@@ -61,10 +61,7 @@ void JointControlPluglet::positionCallback(
 
 
 	//if (ctl_state != Position) {
-	for (unsigned int i = 0; i < handles.size(); i++) {
-		simSetObjectIntParameter(handles[i], 2000, 1);
-		simSetObjectIntParameter(handles[i], 2001, 1);
-	}
+
 	//ctl_state = Position;
 	//}
 
@@ -76,6 +73,10 @@ void JointControlPluglet::positionCallback(
 		int handle = simGetObjectHandle(msg.positions[i].joint_uri.c_str());
 
 		if (handle > 0) {
+
+			simSetObjectIntParameter(handle, 2000, 1);
+			simSetObjectIntParameter(handle, 2001, 1);
+
 			simSetJointTargetPosition(handle,
 						msg.positions[i].value);
 
@@ -88,12 +89,6 @@ void JointControlPluglet::velocityCallback(
 		const brics_actuator::JointVelocities msg) {
 
 
-	//if (ctl_state != Velocity) {
-	for (unsigned int i = 0; i < handles.size(); i++) {
-		simSetObjectIntParameter(handles[i], 2000, 1);
-		simSetObjectIntParameter(handles[i], 2001, 0);
-		simSetObjectIntParameter(handles[i], 1000, 1);
-	}
 	//ctl_state = Velocity;
 	//}
 
@@ -104,9 +99,9 @@ void JointControlPluglet::velocityCallback(
 		}
 		int handle = simGetObjectHandle(msg.velocities[i].joint_uri.c_str());
 
-		if (handles[i] > 0) {
+		if (handle > 0) {
 
-			if (std::fabs(msg.velocities[i].value) < 0.00001) {
+			if (std::fabs(msg.velocities[i].value) < 0.0000001) {
 
 				brics_actuator::JointPositions msg_single;
 				msg_single.poisonStamp = msg.poisonStamp;
@@ -117,12 +112,16 @@ void JointControlPluglet::velocityCallback(
 				value.value = dval;
 				msg_single.positions.push_back(value);
 				//positionCallback(msg_single);
-				simSetObjectIntParameter(handles[i], 2000, 1);
-				simSetObjectIntParameter(handles[i], 2001, 1);
+				simSetObjectIntParameter(handle, 2000, 1);
+				simSetObjectIntParameter(handle, 2001, 1);
 
-				simSetJointTargetPosition(handle,
-						dval);
+				simSetJointTargetPosition(handle, dval);
 			} else {
+
+				simSetObjectIntParameter(handle, 2000, 1);
+				simSetObjectIntParameter(handle, 2001, 0);
+				simSetObjectIntParameter(handle, 1000, 1);
+
 				simSetJointTargetVelocity(handle,
 					msg.velocities[i].value);
 			}
@@ -135,11 +134,6 @@ void JointControlPluglet::torqueCallback(
 		const brics_actuator::JointTorques msg) {
 
 
-	for (unsigned int i = 0; i < handles.size(); i++) {
-		simSetObjectIntParameter(handles[i], 2000, 1);
-		simSetObjectIntParameter(handles[i], 2001, 0);
-		simSetObjectIntParameter(handles[i], 1000, 2);
-	}
 
 	for (unsigned int i = 0; i < msg.torques.size(); i++) {
 
@@ -148,7 +142,13 @@ void JointControlPluglet::torqueCallback(
 		}
 		int handle = simGetObjectHandle(msg.torques[i].joint_uri.c_str());
 
-		if (handles[i] > 0) {
+		if (handle > 0) {
+
+			simSetObjectIntParameter(handle, 2000, 1);
+			simSetObjectIntParameter(handle, 2001, 0);
+			simSetObjectIntParameter(handle, 1000, 2);
+
+
 			simSetJointForce(handle,
 					msg.torques[i].value);
 		}
