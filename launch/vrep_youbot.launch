@@ -2,8 +2,8 @@
 <launch>
 	
 	<!-- send youbot urdf to param server -->
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find youbot_description)/robots/youbot.urdf.xacro'"/>
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find youbot_description)/robots/youbot.urdf.xacro'"/>
 
-	<node pkg="robot_state_publisher" type="state_publisher" name="robot_state_publisher" output="screen"/>
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
 	
 </launch>

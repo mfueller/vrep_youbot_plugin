@@ -11,14 +11,15 @@
 
 #include "v_repLib.h"
 
-#include "sensor_msgs/Image.h"
 #include "sensor_msgs/image_encodings.h"
 #include "sensor_msgs/PointCloud2.h"
+#include <pcl/PCLPointCloud2.h>
 
 #include "cv_bridge/cv_bridge.h"
 
 #include "pcl/point_cloud.h"
-#include "pcl/ros/conversions.h"
+#include "pcl/conversions.h"
+#include "pcl_conversions/pcl_conversions.h"
 #include "pcl/io/pcd_io.h"
 #include "pcl/point_types.h"
 
@@ -35,7 +36,7 @@ PointCloudPluglet::~PointCloudPluglet() {
 
 void PointCloudPluglet::v_repSimStarts_callback() {
 
-	publisher =  nodeHandle.advertise<sensor_msgs::PointCloud2>(topicName, 1);
+	publisher =  nodeHandle.advertise<pcl::PCLPointCloud2>(topicName, 1);
 
 }
 
@@ -96,14 +97,18 @@ void PointCloudPluglet::v_repMessage_callback() {
 		}
 	}
 
-	sensor_msgs::PointCloud2 pc;
+	pcl::PCLPointCloud2 pc;
 
-	pcl::toROSMsg(cloud, pc);
+	pcl::toPCLPointCloud2(cloud, pc);
 
-	pc.header.stamp = ros::Time::now();
-	pc.header.frame_id = frame_id;
+    sensor_msgs::PointCloud2 msg_pc;
 
-	publisher.publish(pc);
+	msg_pc.header.stamp = ros::Time::now();
+	msg_pc.header.frame_id = frame_id;
+
+    pcl_conversions::fromPCL(pc, msg_pc);
+
+	publisher.publish(msg_pc);
 
 }
 

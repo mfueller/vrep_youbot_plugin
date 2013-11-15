@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <name>vrep_youbot_plugin</name>
+  <version>0.0.1</version>
+  <description>vrep_youbot_plugin</description>
+  <author>matthias</author>
+  <maintainer email="alexei.ozhigov@gmail.com">alexey-ozhigov</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/vrep_plugin</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>opencv2</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>brics_actuator</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>perception_pcl</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>opencv2</run_depend>
+  <run_depend>image_transport</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>brics_actuator</run_depend>
+  <run_depend>cv_bridge</run_depend>
+  <run_depend>perception_pcl</run_depend>
+</package>
