@@ -8,16 +8,21 @@ project(vrep_youbot_plugin)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC") 
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -D__linux") 
+
 find_package(catkin REQUIRED)
 find_package(PCL 1.7 REQUIRED)
-catkin_package(LIBRARIES v_repExtyouBot
-               CATKIN_DEPENDS roscpp std_msgs sensor_msgs cv_bridge tf brics_actuator
-               DEPENDS opencv pthread dl PCL)
+#LIBRARIES v_repExtyouBot
+catkin_package(
+               CATKIN_DEPENDS roscpp rosconsole std_msgs sensor_msgs cv_bridge tf brics_actuator roslib
+               DEPENDS opencv pthread dl PCL roscpp rosconsole roslib)
 
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 message("catkin Include DIRS" ${catkin_INCLUDE_DIRS})
 message("PCL Include DIRS" ${PCL_INCLUDE_DIRS})
+message("Catkin Libs: " ${catkin_LIBRARIES})
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
@@ -35,10 +40,16 @@ message("PCL Include DIRS" ${PCL_INCLUDE_DIRS})
 #rosbuild_add_boost_directories()
 
 #rosbuild_add_executable(
+
+LINK_DIRECTORIES("/opt/ros/hydro/lib")
+
 add_library(
+#add_executable(
 v_repExtyouBot
+
 src/v_repExtyouBot.cpp 
 src/v_repLib.cpp 
+
 
 src/lua/GenericLuaFunctionRegistry.cpp
 src/lua/GenericLuaCallback.cpp
@@ -65,6 +76,15 @@ src/ros/callback/SwedishBaseControllerCallback.cpp
 src/ros/pluglet/SwedishBaseControllerPluglet.cpp
 ) 
 
-target_link_libraries(v_repExtyouBot pthread)
-target_link_libraries(v_repExtyouBot dl)
-
+target_link_libraries(v_repExtyouBot 
+    pthread
+    dl
+    roslib
+    rosconsole
+    rostime
+    rospack
+    roscpp_serialization
+    roscpp
+    boost_system
+    ${catkin_LIBRARIES}
+)
