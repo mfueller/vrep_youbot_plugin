@@ -29,8 +29,8 @@ SwedishBaseControllerCallback::~SwedishBaseControllerCallback() {
 
 void SwedishBaseControllerCallback::luaCall(Argslist args) {
 
-	if (args.size() < 1) {
-		ROS_ERROR("Not enough arguments for v-rep clock publisher");
+	if (args.size() < 3) {
+		ROS_ERROR("Not enough arguments for v-rep swedish publisher");
 		return;
 	}
 
@@ -43,9 +43,15 @@ void SwedishBaseControllerCallback::luaCall(Argslist args) {
 	int r3 = boost::any_cast<int> (handles[2]);
 	int r4 = boost::any_cast<int> (handles[3]);
 
+	float R = boost::any_cast<float>(args[2]);
+
 	pluglet->setHandles(r1,r2,r3,r4);
 
+
+	pluglet->setR(R);
+
 	pluglet->init();
+
 
 	vrep::VRepPlugletRegistry::getInstance()->getPluglets().push_back(pluglet);
 }
@@ -54,12 +60,12 @@ GenericLuaCallback::LuaDescription SwedishBaseControllerCallback::getDescription
 	GenericLuaCallback::LuaDescription d;
 
 	d.name = "rosCreateSwedishBaseController";
-	d.tooltip = "rosCreateSwedishBaseControllerCallback(string topicName, int[] handles, float wheelDiameters)";
-	d.argTypes[0] = 2;
+	d.tooltip = "rosCreateSwedishBaseControllerCallback(string topicName, int[] handles, float wheel_factor)";
+	d.argTypes[0] = 3;
 	d.argTypes[1] = sim_lua_arg_string;
 	d.argTypes[2] = sim_lua_arg_table | sim_lua_arg_int;
 	d.argTypes[3] = sim_lua_arg_float;
-	d.argTypes[3] = 0;
+	d.argTypes[4] = 0;
 
 	return d;
 }

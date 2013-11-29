@@ -43,7 +43,7 @@ void SwedishBaseControllerPluglet::cmdCallback(
 	float vel_wheel_0 = -forwBackVel - leftRightVel - rotVel;
 	float vel_wheel_1 = -forwBackVel + leftRightVel - rotVel;
 	float vel_wheel_2 = -forwBackVel - leftRightVel + rotVel;
-y	float vel_wheel_3 = -forwBackVel + leftRightVel + rotVel;
+	float vel_wheel_3 = -forwBackVel + leftRightVel + rotVel;
 
 	simSetJointTargetVelocity(handles[0],
 			vel_wheel_0);
@@ -53,6 +53,10 @@ y	float vel_wheel_3 = -forwBackVel + leftRightVel + rotVel;
 			vel_wheel_2);
 	simSetJointTargetVelocity(handles[3],
 			vel_wheel_3);
+
+
+	std::cout << "R: " << R << std::endl;
+	//std::cout << "velocity: " << vel_wheel_3 << std::endl;
 
 	last_cmd_time = simGetSimulationTime();
 }
@@ -91,7 +95,10 @@ void SwedishBaseControllerPluglet::v_repSimStarts_callback() {
 }
 
 void SwedishBaseControllerPluglet::init() {
+
 	subscriber=nodeHandle.subscribe(topicName.c_str(), 1, &SwedishBaseControllerPluglet::cmdCallback,this);
+	std::cout << "init" << std::endl;
+	
 }
 
 void SwedishBaseControllerPluglet::v_repStart_callback() {
