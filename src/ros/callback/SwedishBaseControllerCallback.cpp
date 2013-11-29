@@ -45,6 +45,8 @@ void SwedishBaseControllerCallback::luaCall(Argslist args) {
 
 	pluglet->setHandles(r1,r2,r3,r4);
 
+	pluglet->init();
+
 	vrep::VRepPlugletRegistry::getInstance()->getPluglets().push_back(pluglet);
 }
 
