@@ -44,7 +44,7 @@ public:
 		return frame_id;
 	}
 
-	void setFrameId(const std::string& frameId) {
+	void setFrameId(const std::string frameId) {
 		frame_id = frameId;
 	}
 

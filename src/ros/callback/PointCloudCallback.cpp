@@ -37,7 +37,7 @@ void PointCloudCallback::luaCall(Argslist args) {
 
 	pub->init();
 
-	vrep::VRepPlugletRegistry::getInstance()->getPluglets();
+	vrep::VRepPlugletRegistry::getInstance()->getPluglets().push_back(pub);
 }
 
 GenericLuaCallback::LuaDescription PointCloudCallback::getDescription() {
