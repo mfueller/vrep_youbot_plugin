@@ -4,10 +4,8 @@ vrep_youbot_plugin
 Installation
 --
 
-1) Install robocup@work packages (including ROS, youBot packages,...) 
-- https://github.com/b-it-bots/RoboCupAtWork or
-- https://github.com/RM-SS2013/RoboCupAtWork
- 
+1) Install youBot ROS packages
+- e.g.  $ sudo apt-get install ros-hydro-youbot-driver-ros-interface
 
 2) Install v-rep (http://www.v-rep.eu/) into i.e. /opt/v-rep
 
