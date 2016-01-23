@@ -99,7 +99,7 @@ VREP_DLLEXPORT unsigned char v_repStart(void* reservedPointer,int reservedInt)
 	char** argv = {};
 
 
-	ros::init(argc, argv,"V-RepyouBot");
+	ros::init(argc, argv,"V_RepyouBot");
 
 	if(!ros::master::check()) {
 		std::cout << "No ROS master available - youBot Plugin not initialized" << std::endl;
