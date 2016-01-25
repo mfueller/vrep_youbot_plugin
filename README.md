@@ -14,7 +14,7 @@ Installation
 
 4) compile
 
-$ rosmake
+$ catkin_make
 
 5) copy the compiled library libv_repExtyouBot.so into your /opt/v-rep directory
 
