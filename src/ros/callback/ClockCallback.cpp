@@ -7,8 +7,8 @@
 
 #include "vrep_plugin/ros/callback/ClockCallback.h"
 
-//#include "vrep_plugin/ros/pluglet/ClockPluglet.h"
-//#include "vrep_plugin/VRepPlugletRegistry.h"
+#include "vrep_plugin/ros/pluglet/ClockPluglet.h"
+#include "vrep_plugin/VRepPlugletRegistry.h"
 
 #include "ros/ros.h"
 
@@ -41,7 +41,7 @@ void ClockCallback::luaCall(Argslist args) {
 	pluglet->setTopicName(boost::any_cast<std::string>(args[0]));
 
 	vrep::VRepPlugletRegistry::getInstance()->getPluglets().push_back(pluglet);
-	
+
 }
 
 GenericLuaCallback::LuaDescription ClockCallback::getDescription() {

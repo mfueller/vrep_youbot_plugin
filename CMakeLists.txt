@@ -11,18 +11,22 @@ project(vrep_youbot_plugin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC") 
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -D__linux") 
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED brics_actuator)
 find_package(PCL 1.7 REQUIRED)
 #LIBRARIES v_repExtyouBot
+
+#generate_messages(DEPENDENCIES brics_actuator)
+
 catkin_package(
-               CATKIN_DEPENDS roscpp rosconsole std_msgs sensor_msgs cv_bridge tf brics_actuator roslib
-               DEPENDS opencv pthread dl PCL roscpp rosconsole roslib)
+               CATKIN_DEPENDS roscpp rosconsole std_msgs geometry_msgs sensor_msgs cv_bridge tf brics_actuator roslib geometry_msgs
+               DEPENDS opencv pthread dl PCL roscpp rosconsole)
 
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 message("catkin Include DIRS" ${catkin_INCLUDE_DIRS})
 message("PCL Include DIRS" ${PCL_INCLUDE_DIRS})
 message("Catkin Libs: " ${catkin_LIBRARIES})
+
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
@@ -41,7 +45,7 @@ message("Catkin Libs: " ${catkin_LIBRARIES})
 
 #rosbuild_add_executable(
 
-LINK_DIRECTORIES("/opt/ros/hydro/lib")
+#LINK_DIRECTORIES("/opt/ros/hydro/lib")
 
 add_library(
 #add_executable(
@@ -66,8 +70,8 @@ src/ros/pluglet/ClockPluglet.cpp
 src/ros/callback/LaserScanCallback.cpp
 src/ros/pluglet/LaserScanPluglet.cpp
 
-src/ros/callback/PointCloudCallback.cpp
-src/ros/pluglet/PointCloudPluglet.cpp
+#src/ros/callback/PointCloudCallback.cpp
+#src/ros/pluglet/PointCloudPluglet.cpp
 
 src/ros/callback/JointControlCallback.cpp
 src/ros/pluglet/JointControlPluglet.cpp
@@ -79,12 +83,6 @@ src/ros/pluglet/SwedishBaseControllerPluglet.cpp
 target_link_libraries(v_repExtyouBot 
     pthread
     dl
-    roslib
-    rosconsole
-    rostime
-    rospack
-    roscpp_serialization
-    roscpp
     boost_system
     ${catkin_LIBRARIES}
 )

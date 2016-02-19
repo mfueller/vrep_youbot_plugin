@@ -42,7 +42,9 @@ public:
 
 	void v_repSimEnds_callback();
 
-
+	bool is_active() {
+	  return true;
+	}
 	const std::string& getTopicName() const {
 		return topicName;
 	}
