@@ -1,36 +1,45 @@
 // This file is part of V-REP, the Virtual Robot Experimentation Platform.
-// 
-// Copyright 2006-2013 Dr. Marc Andreas Freese. All rights reserved. 
+//
+// Copyright 2006-2016 Coppelia Robotics GmbH. All rights reserved.
 // marc@coppeliarobotics.com
 // www.coppeliarobotics.com
-// 
+//
 // V-REP is dual-licensed, under the terms of EITHER (at your option):
 //   1. V-REP commercial license (contact us for details)
 //   2. GNU GPL (see below)
-// 
+//
 // GNU GPL license:
 // -------------------------------------------------------------------
 // V-REP is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
-// V-REP is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-// 
+//
+// V-REP IS DISTRIBUTED "AS IS", WITHOUT ANY EXPRESS OR IMPLIED
+// WARRANTY. THE USER WILL USE IT AT HIS/HER OWN RISK. THE ORIGINAL
+// AUTHORS AND COPPELIA ROBOTICS GMBH WILL NOT BE LIABLE FOR DATA LOSS,
+// DAMAGES, LOSS OF PROFITS OR ANY OTHER KIND OF LOSS WHILE USING OR
+// MISUSING THIS SOFTWARE.
+//
+// See the GNU General Public License for more details.
+//
 // You should have received a copy of the GNU General Public License
 // along with V-REP.  If not, see <http://www.gnu.org/licenses/>.
 // -------------------------------------------------------------------
 //
-// This file was automatically created for V-REP release V3.0.2 on March 14th 2013
+// This file was automatically created for V-REP release V3.3.0 on February 19th 2016
 
 #if !defined(V_REPCONST_INCLUDED_)
 #define V_REPCONST_INCLUDED_
 
+#define VREP_PROGRAM_VERSION_NB 30300
+#define VREP_PROGRAM_VERSION "3.3.0."
+
+#define VREP_PROGRAM_REVISION_NB 1
+#define VREP_PROGRAM_REVISION "(rev. 1)"
+
 /* Scene object types. Values are serialized */
-enum { 
+enum {
 		sim_object_shape_type=0,
 		sim_object_joint_type,
 		sim_object_graph_type,
@@ -62,7 +71,8 @@ enum {
 	sim_appobj_script_type,
 	sim_appobj_pathplanning_type,
 	sim_appobj_RESERVED_type,
-	sim_appobj_texture_type
+	sim_appobj_texture_type,
+	sim_appobj_motionplanning_type
 };
 
 /* Ik calculation methods. Values are serialized */
@@ -143,6 +153,8 @@ enum { /* Model properties (serialized): */
 		sim_modelproperty_not_respondable				=0x0040, /* cannot be selected if sim_modelproperty_not_dynamic is not selected */
 		sim_modelproperty_not_reset						=0x0080, /* Model is not reset at simulation end. This flag is cleared at simulation end */
 		sim_modelproperty_not_visible					=0x0100, /* Whole model is invisible, independent of local visibility settings */
+		sim_modelproperty_scripts_inactive				=0x0200, /* All scripts in the model will not be executed */
+		sim_modelproperty_not_showasinsidemodel			=0x0400, /* Whole model is invisible to any model bounding box */
 		sim_modelproperty_not_model						=0xf000  /* object is not a model */
 };
 
@@ -157,6 +169,10 @@ enum { /* Check the documentation instead of comments below!! */
 		sim_message_keypress,					/* a key was pressed while the focus was on a page (aux[0]=key, aux[1]=ctrl and shift key state) */
 		sim_message_bannerclicked,				/* a banner was clicked (aux[0]=banner ID) */
 		sim_message_scene_loaded,				/* a scene was loaded */
+
+		sim_message_prox_sensor_select_down,	/* a "geometric" click select (mouse down) was registered. Enable with sim_intparam_prox_sensor_select_down. aux[0]=objectID, aux2[0-2]=pt coord, aux2[3-5]=pt normal vector */
+		sim_message_prox_sensor_select_up,		/* a "geometric" click select (mouse up) was registered. Enable with sim_intparam_prox_sensor_select_up. aux[0]=objectID, aux2[0-2]=pt coord, aux2[3-5]=pt normal vector */
+		sim_message_pick_select_down,			/* a "pick" click select (mouse down) was registered. aux[0]=objectID */
 
 
 		/* Following messages are dispatched only to the C-API (not available from Lua): */
@@ -214,7 +230,7 @@ enum { /* Check the documentation instead of comments below!! */
 		sim_message_eventcallback_keypress,			/* a key was pressed while the focus was on a page (aux[0]=key, aux[1]=ctrl and shift key state) */
 		sim_message_eventcallback_modulehandleinsensingpart, /* called when simHandleModule in Lua is called with argument true */
 
-		sim_message_eventcallback_renderingpass, /* called just before the scene is rendered */
+		sim_message_eventcallback_renderingpass, /* called just before the scene is rendered. From the UI thread! */
 		sim_message_eventcallback_bannerclicked, /* called when a banner was clicked (aux[0]=banner ID) */
 		sim_message_eventcallback_menuitemselected, /* auxiliaryData[0] indicates the handle of the item, auxiliaryData[1] indicates the state of the item */
 		sim_message_eventcallback_refreshdialogs, /* aux[0]=refresh degree (0=light, 1=medium, 2=full) */
@@ -226,19 +242,87 @@ enum { /* Check the documentation instead of comments below!! */
 		sim_message_eventcallback_guipass,
 		sim_message_eventcallback_mainscriptabouttobecalled,
 
-		sim_message_eventcallback_rmlposition, // the command simRMLPosition was called. The appropriate plugin should handle the call
-		sim_message_eventcallback_rmlvelocity, // the command simRMLVelocity was called. The appropriate plugin should handle the call
+		sim_message_eventcallback_rmlposition, /* the command simRMLPosition was called. The appropriate plugin should handle the call */
+		sim_message_eventcallback_rmlvelocity, /* the command simRMLVelocity was called. The appropriate plugin should handle the call */
 
-		sim_message_eventcallback_meshcalculationplugin, // to interact with the mesh calculation plugin
-		sim_message_eventcallback_dynamicsplugin, // to interact with the dynamics calculation plugin
-		sim_message_eventcallback_pathplanningplugin, // to interact with the path planning plugin
-		sim_message_eventcallback_colladaplugin, // to interact with the collada plugin
+		sim_message_eventcallback_meshcalculationplugin, /* to interact with the mesh calculation plugin */
+		sim_message_eventcallback_dynamicsplugin, /* deprecated */
+		sim_message_eventcallback_pathplanningplugin, /* to interact with the path planning plugin */
+		sim_message_eventcallback_colladaplugin, /* to interact with the collada plugin */
+
+		sim_message_eventcallback_opengl, /* a simple callback at different rendering stages */
+		sim_message_eventcallback_openglframe, /* a callback with the full rendered opengl frame data (that can be modified then returned) */
+		sim_message_eventcallback_openglcameraview, /* a callback with the rendered opengl view data (that can be modified then returned) */
+
+		sim_message_eventcallback_proxsensorselectdown, /* a "geometric" click select (mouse down) was registered. Enable with sim_intparam_prox_sensor_select_down. aux[0]=objectID, customData[0-2]=pt coord (floats), customData[3-5]=pt normal vector (floats)*/
+		sim_message_eventcallback_proxsensorselectup, /* a "geometric" click select (mouse up) was registered. Enable with sim_intparam_prox_sensor_select_down. aux[0]=objectID, customData[0-2]=pt coord (floats), customData[3-5]=pt normal vector (floats)*/
+		sim_message_eventcallback_pickselectdown, /* a "pick" click select (mouse down) was registered. aux[0]=objectID */
+
+		sim_message_eventcallback_rmlpos, /* the command simRMLPos was called. The appropriate plugin should handle the call */
+		sim_message_eventcallback_rmlvel, /* the command simRMLVel was called. The appropriate plugin should handle the call */
+		sim_message_eventcallback_rmlstep, /* the command simRMLStep was called. The appropriate plugin should handle the call */
+		sim_message_eventcallback_rmlremove, /* the command simRMLRemove was called. The appropriate plugin should handle the call */
+		sim_message_eventcallback_rmlinfo, /* used internally */
+
+		sim_message_eventcallback_beforerendering, /* called just before the scene is rendered. From the main SIM thread! */
+
+		sim_message_eventcallback_extrenderer_start,
+		sim_message_eventcallback_extrenderer_light,
+		sim_message_eventcallback_extrenderer_mesh,
+		sim_message_eventcallback_extrenderer_stop,
+
+		sim_message_eventcallback_dynamicspluginbullet, /* to interact with the dynamics calculation plugin, Bullet */
+		sim_message_eventcallback_dynamicspluginode, /* to interact with the dynamics calculation plugin, ODE */
+		sim_message_eventcallback_dynamicspluginvortex, /* to interact with the dynamics calculation plugin, Vortex */
+		sim_message_eventcallback_dynamicspluginnewton, /* to interact with the dynamics calculation plugin, Newton */
+		sim_message_eventcallback_dynamicspluginreserved2, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved3, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved4, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved5, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved6, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved7, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved8, /* for future extensions */
+		sim_message_eventcallback_dynamicspluginreserved9, /* for future extensions */
+
+		sim_message_eventcallback_extrenderer_triangles,
 
 
 		sim_message_simulation_start_resume_request=0x1000,
 		sim_message_simulation_pause_request,
 		sim_message_simulation_stop_request
 
+};
+
+// Rendering attributes:
+enum {
+		sim_displayattribute_renderpass		=0x0001,
+		sim_displayattribute_depthpass		=0x0002,
+		sim_displayattribute_pickpass		=0x0004,
+		sim_displayattribute_selected		=0x0008,
+		sim_displayattribute_groupselection	=0x0010,
+		sim_displayattribute_mainselection	=0x0020,
+		sim_displayattribute_forcewireframe	=0x0040,
+		sim_displayattribute_forbidwireframe=0x0080,
+		sim_displayattribute_forbidedges	=0x0100,
+		sim_displayattribute_originalcolors	=0x0200,
+		sim_displayattribute_ignorelayer	=0x0400,
+		sim_displayattribute_forvisionsensor	=0x0800,
+		sim_displayattribute_colorcodedpickpass	=0x1000,
+		sim_displayattribute_colorcoded			=0x2000,
+		sim_displayattribute_trianglewireframe	=0x4000,
+		sim_displayattribute_inertiaonly		=0x8000,
+		sim_displayattribute_thickEdges				=0x10000,
+		sim_displayattribute_dynamiccontentonly		=0x20000,
+		sim_displayattribute_mirror					=0x40000,
+		sim_displayattribute_useauxcomponent		=0x80000,
+		sim_displayattribute_ignorerenderableflag	=0x100000,
+		sim_displayattribute_noopenglcallbacks		=0x200000,
+		sim_displayattribute_FREE					=0x400000,
+		sim_displayattribute_noghosts				=0x800000,
+		sim_displayattribute_nopointclouds			=0x1000000,
+		sim_displayattribute_nodrawingobjects		=0x2000000,
+		sim_displayattribute_noparticles			=0x4000000,
+		sim_displayattribute_colorcodedtriangles	=0x8000000
 };
 
 enum { /* Scene object properties. Combine with the | operator */
@@ -252,18 +336,24 @@ enum { /* Scene object properties. Combine with the | operator */
 	sim_objectproperty_selectable				=0x0020,
 	sim_objectproperty_reserved7				=0x0040,
 	sim_objectproperty_selectmodelbaseinstead	=0x0080,
-	sim_objectproperty_dontshowasinsidemodel	=0x0100
-	/* reserved									=0x0200 */
+	sim_objectproperty_dontshowasinsidemodel	=0x0100,
+	/* reserved									=0x0200, */
+	sim_objectproperty_canupdatedna				=0x0400,
+	sim_objectproperty_selectinvisible			=0x0800,
+	sim_objectproperty_depthinvisible			=0x1000
 };
 
 enum { /* type of arguments (input and output) for custom lua commands */
-	sim_lua_arg_nil=0,			
-	sim_lua_arg_bool,		
+	sim_lua_arg_nil=0,
+	sim_lua_arg_bool,
 	sim_lua_arg_int,
 	sim_lua_arg_float,
 	sim_lua_arg_string,
 	sim_lua_arg_invalid,
+	sim_lua_arg_charbuff,
+	sim_lua_arg_double,
 	sim_lua_arg_table=8
+	/* SIM_LUA_ARG_NIL_ALLOWED=65536 is defined and used in CLuaFunctionData.h. This flag is reserved here. */
 };
 
 enum { /* custom user interface properties. Values are serialized. */
@@ -330,10 +420,75 @@ enum { /* Script types (serialized!) */
 	sim_scripttype_addonfunction,
 	sim_scripttype_jointctrlcallback,
 	sim_scripttype_contactcallback,
+	sim_scripttype_customizationscript,
+	sim_scripttype_generalcallback,
 	sim_scripttype_threaded=0x00f0			/* Combine with sim_scripttype_childscript if you want */
 };
 
+enum { /* Main script call types */
+	sim_mainscriptcall_initialization=0, /* first time called. Do some initializations */
+	sim_mainscriptcall_cleanup, /* last time called. Do some clean-up */
+	sim_mainscriptcall_regular /* otherwise */
+};
+
+enum { /* Child script call types */
+	sim_childscriptcall_initialization=0, /* first time called. Do some initializations */
+	sim_childscriptcall_cleanup, /* last time called. Do some clean-up */
+	sim_childscriptcall_actuation, /* called in the "actuation" phase. */
+	sim_childscriptcall_sensing, /* called in the "sensing" phase. */
+	sim_childscriptcall_threaded /* called only by threaded scripts. */
+};
+
+enum { /* Customization script call types */
+	sim_customizationscriptcall_initialization=0, /* first time called. Do some initializations */
+	sim_customizationscriptcall_cleanup, /* last time called. Do some clean-up */
+	sim_customizationscriptcall_nonsimulation, /* called while simulation not running */
+	sim_customizationscriptcall_lastbeforesimulation, /* called just before simulation starts */
+	sim_customizationscriptcall_firstaftersimulation, /* called just after simulation ended */
+	sim_customizationscriptcall_simulationactuation, /* called in the "actuation" phase of the main script. Called only if the script is flagged as sim_customizationscriptattribute_activeduringsimulation */
+	sim_customizationscriptcall_simulationsensing, /* called in the "sensing" phase of the main script. Called only if the script is flagged as sim_customizationscriptattribute_activeduringsimulation */
+	sim_customizationscriptcall_simulationpause, /* called while simulation is paused */
+	sim_customizationscriptcall_simulationpausefirst, /* called just after a simulation was paused */
+	sim_customizationscriptcall_simulationpauselast /* called just before a simulation is unpaused */
+};
+
+enum { /* Script attributes */
+	sim_customizationscriptattribute_activeduringsimulation=0, /* boolean attribute */
+	sim_scriptattribute_executionorder, /* integer attribute, see sim_scriptexecorder_normal, etc. */
+	sim_scriptattribute_executioncount, /* integer attribute */
+	sim_childscriptattribute_automaticcascadingcalls, /* boolean attribute */
+	sim_childscriptattribute_enabled /* boolean attribute */
+};
+
+enum { /* Script execution order, is serialized */
+	sim_scriptexecorder_first=0,
+	sim_scriptexecorder_normal,
+	sim_scriptexecorder_last
+};
+
+enum { /* Threaded script resume location */
+	sim_scriptthreadresume_allnotyetresumed	=-1,
+	sim_scriptthreadresume_default			=0,
+	sim_scriptthreadresume_actuation_first	=1,
+	sim_scriptthreadresume_actuation_last	=2,
+	sim_scriptthreadresume_sensing_first	=3,
+	sim_scriptthreadresume_sensing_last		=4,
+	sim_scriptthreadresume_custom			=5
+};
+
+enum { /* General callback IDs */
+	sim_callbackid_rossubscriber			=1,
+	sim_callbackid_dynstep					=2,
+	sim_callbackid_userdefined				=1000
+};
+
+
 enum { /* API call error messages */
+	sim_api_error_report =1,
+	sim_api_error_output =2,
+	sim_api_warning_output =4,
+
+	/* for backward compatibility */
 	sim_api_errormessage_ignore	=0,	/* does not memorize nor output errors */
 	sim_api_errormessage_report	=1,	/* memorizes errors (default for C-API calls) */
 	sim_api_errormessage_output	=2  /* memorizes and outputs errors (default for Lua-API calls) */
@@ -349,7 +504,17 @@ enum { /* special argument of some functions: */
 	sim_handle_single					=-8,
 	sim_handle_default					=-9,
 	sim_handle_all_except_self			=-10,
-	sim_handle_parent					=-11
+	sim_handle_parent					=-11,
+	sim_handle_scene					=-12
+};
+
+enum { /* special handle flags: */
+	sim_handleflag_assembly				=0x00400000,
+	sim_handleflag_togglevisibility		=0x00400000,
+	sim_handleflag_extended				=0x00400000,
+	sim_handleflag_greyscale			=0x00400000,
+	sim_handleflag_model				=0x00800000,
+	sim_handleflag_rawvalue				=0x01000000
 };
 
 enum { /* distance calculation methods: (serialized) */
@@ -384,13 +549,13 @@ enum { /* Path properties: */
 	sim_pathproperty_show_orientation		=0x0002,
 	sim_pathproperty_closed_path			=0x0004,
 	sim_pathproperty_automatic_orientation	=0x0008,
-	sim_pathproperty_invert_velocity		=0x0010,
-	sim_pathproperty_infinite_acceleration	=0x0020,
+	sim_pathproperty_invert_velocity_deprecated		=0x0010,
+	sim_pathproperty_infinite_acceleration_deprecated	=0x0020,
 	sim_pathproperty_flat_path				=0x0040,
 	sim_pathproperty_show_position			=0x0080,
-	sim_pathproperty_auto_velocity_profile_translation	=0x0100,
-	sim_pathproperty_auto_velocity_profile_rotation		=0x0200,
-	sim_pathproperty_endpoints_at_zero					=0x0400,
+	sim_pathproperty_auto_velocity_profile_translation_deprecated	=0x0100,
+	sim_pathproperty_auto_velocity_profile_rotation_deprecated		=0x0200,
+	sim_pathproperty_endpoints_at_zero_deprecated					=0x0400,
 	sim_pathproperty_keep_x_up							=0x0800
 };
 
@@ -406,21 +571,24 @@ enum { /* drawing objects: */
 	sim_drawing_spherepoints,			/* 3 values per point (sphere size in meters) */
 
 	/* following can be or-combined: */
-	sim_drawing_itemcolors				=0x00020, /* +3 values per item (each item has its own ambient color (r,g,b values)). Mutually exclusive with sim_drawing_vertexcolors */
-	sim_drawing_vertexcolors			=0x00040, /* +3 values per vertex (each vertex has its own ambient color (r,g,b values). Only for sim_drawing_lines (+6) and for sim_drawing_triangles(+9)). Mutually exclusive with sim_drawing_itemcolors */
-	sim_drawing_itemsizes				=0x00080, /* +1 value per item (each item has its own size). Not for sim_drawing_triangles */
-	sim_drawing_backfaceculling			=0x00100, /* back faces are not displayed for all items */
-	sim_drawing_wireframe				=0x00200, /* all items displayed in wireframe */
-	sim_drawing_painttag				=0x00400, /* all items are tagged as paint (for additinal processing at a later stage) */
-	sim_drawing_followparentvisibility	=0x00800, /* if the object is associated with a scene object, then it follows that visibility, otherwise it is always visible */
-	sim_drawing_cyclic					=0x01000, /* if the max item count was reached, then the first items are overwritten. */
-	sim_drawing_50percenttransparency	=0x02000, /* the drawing object will be 50% transparent */
-	sim_drawing_25percenttransparency	=0x04000, /* the drawing object will be 25% transparent */
-	sim_drawing_12percenttransparency	=0x08000, /* the drawing object will be 12.5% transparent */
-	sim_drawing_emissioncolor			=0x10000, /* When used in combination with sim_drawing_itemcolors or sim_drawing_vertexcolors, then the specified colors will be for the emissive component */
-	sim_drawing_facingcamera			=0x20000, /* Only for trianglepoints, quadpoints, discpoints and cubepoints. If specified, the normal verctor is calculated to face the camera (each item data requires 3 values less) */
-	sim_drawing_overlay					=0x40000, /* When specified, objects are always drawn on top of "regular objects" */
-	sim_drawing_itemtransparency		=0x80000  /* +1 value per item (each item has its own transparency value (0-1)). Not compatible with sim_drawing_vertexcolors */
+	sim_drawing_itemcolors				=0x000020, /* +3 values per item (each item has its own ambient color (r,g,b values)). Mutually exclusive with sim_drawing_vertexcolors */
+	sim_drawing_vertexcolors			=0x000040, /* +3 values per vertex (each vertex has its own ambient color (r,g,b values). Only for sim_drawing_lines (+6) and for sim_drawing_triangles(+9)). Mutually exclusive with sim_drawing_itemcolors */
+	sim_drawing_itemsizes				=0x000080, /* +1 value per item (each item has its own size). Not for sim_drawing_triangles */
+	sim_drawing_backfaceculling			=0x000100, /* back faces are not displayed for all items */
+	sim_drawing_wireframe				=0x000200, /* all items displayed in wireframe */
+	sim_drawing_painttag				=0x000400, /* all items are tagged as paint (for additinal processing at a later stage) */
+	sim_drawing_followparentvisibility	=0x000800, /* if the object is associated with a scene object, then it follows that visibility, otherwise it is always visible */
+	sim_drawing_cyclic					=0x001000, /* if the max item count was reached, then the first items are overwritten. */
+	sim_drawing_50percenttransparency	=0x002000, /* the drawing object will be 50% transparent */
+	sim_drawing_25percenttransparency	=0x004000, /* the drawing object will be 25% transparent */
+	sim_drawing_12percenttransparency	=0x008000, /* the drawing object will be 12.5% transparent */
+	sim_drawing_emissioncolor			=0x010000, /* When used in combination with sim_drawing_itemcolors or sim_drawing_vertexcolors, then the specified colors will be for the emissive component */
+	sim_drawing_facingcamera			=0x020000, /* Only for trianglepoints, quadpoints, discpoints and cubepoints. If specified, the normal verctor is calculated to face the camera (each item data requires 3 values less) */
+	sim_drawing_overlay					=0x040000, /* When specified, objects are always drawn on top of "regular objects" */
+	sim_drawing_itemtransparency		=0x080000,  /* +1 value per item (each item has its own transparency value (0-1)). Not compatible with sim_drawing_vertexcolors */
+	sim_drawing_persistent				=0x100000,  /* object is not automatically removed when created via a simulation script */
+	sim_drawing_auxchannelcolor1		=0x200000,  /* when specifying the emission color component in the simAddDrawingObject function, 6 values should be specified instead of 3: 3 for the emission component, and 3 for the aux channel component */
+	sim_drawing_auxchannelcolor2		=0x400000,  /* When used in combination with sim_drawing_itemcolors or sim_drawing_vertexcolors, then the specified colors will be for the aux channel component */
 };
 
 enum { /* banner values: */
@@ -477,8 +645,8 @@ enum { /* Boolean parameters: */
 	sim_boolparam_ik_handling_enabled,
 	sim_boolparam_gcs_handling_enabled,
 	sim_boolparam_dynamics_handling_enabled,
-	sim_boolparam_joint_motion_handling_enabled,
-	sim_boolparam_path_motion_handling_enabled,
+	sim_boolparam_joint_motion_handling_enabled_deprecated,
+	sim_boolparam_path_motion_handling_enabled_deprecated,
 	sim_boolparam_proximity_sensor_handling_enabled,
 	sim_boolparam_vision_sensor_handling_enabled,
 	sim_boolparam_mill_handling_enabled,
@@ -494,23 +662,42 @@ enum { /* Boolean parameters: */
 	sim_boolparam_rml4_available,
 	sim_boolparam_mirrors_enabled,
 	sim_boolparam_aux_clip_planes_enabled,
-	sim_boolparam_full_model_copy_from_api,
+	sim_boolparam_reserved3,
 	sim_boolparam_realtime_simulation,
 	sim_boolparam_use_glfinish_cmd,
 	sim_boolparam_force_show_wireless_emission,
-	sim_boolparam_force_show_wireless_reception
+	sim_boolparam_force_show_wireless_reception,
+	sim_boolparam_video_recording_triggered,
+	sim_boolparam_reserved1,
+	sim_boolparam_reserved2,
+	sim_boolparam_threaded_rendering_enabled,
+	sim_boolparam_fullscreen,
+	sim_boolparam_headless,
+	sim_boolparam_hierarchy_toolbarbutton_enabled,
+	sim_boolparam_browser_toolbarbutton_enabled,
+	sim_boolparam_objectshift_toolbarbutton_enabled,
+	sim_boolparam_objectrotate_toolbarbutton_enabled,
+	sim_boolparam_force_calcstruct_all_visible,
+	sim_boolparam_force_calcstruct_all,
+	sim_boolparam_exit_request,
+	sim_boolparam_play_toolbarbutton_enabled,
+	sim_boolparam_pause_toolbarbutton_enabled,
+	sim_boolparam_stop_toolbarbutton_enabled,
+	sim_boolparam_waiting_for_trigger,
+	sim_boolparam_objproperties_toolbarbutton_enabled,
+	sim_boolparam_calcmodules_toolbarbutton_enabled
 };
 
 enum { /* Integer parameters: */
 	sim_intparam_error_report_mode=0, /* Check sim_api_errormessage_... constants above for valid values */
-	sim_intparam_program_version,		/* e.g Version 2.1.4 --> 20104. Can only be read */
+	sim_intparam_program_version,		/* e.g Version 2.1.4 --> 20104. Can only be read. See also sim_intparam_program_revision */
 	sim_intparam_instance_count,	/* do not use anymore (always returns 1 since V-REP 2.5.11) */
 	sim_intparam_custom_cmd_start_id, /* can only be read */
 	sim_intparam_compilation_version, /* 0=evaluation version, 1=full version, 2=player version. Can only be read */
 	sim_intparam_current_page,
 	sim_intparam_flymode_camera_handle, /* can only be read */
 	sim_intparam_dynamic_step_divider, /* can only be read */
-	sim_intparam_dynamic_engine, /* 0=Bullet, 1=ODE. Can only be read */
+	sim_intparam_dynamic_engine, /* 0=Bullet, 1=ODE. 2=Vortex. 3=Newton. Can only be read */
 	sim_intparam_server_port_start, /* can only be read */
 	sim_intparam_server_port_range, /* can only be read */
 	sim_intparam_visible_layers,
@@ -523,16 +710,55 @@ enum { /* Integer parameters: */
 	sim_intparam_event_flags_read_clear, /* can only be read */
 	sim_intparam_platform, /* can only be read */
 	sim_intparam_scene_unique_id, /* can only be read */
-	sim_intparam_work_thread_count /* 0-256. 0 to disable */
+	sim_intparam_work_thread_count, /* 0-256. 0 to disable, -1 to try to automatically set */
+	sim_intparam_mouse_x, /* can only be read */
+	sim_intparam_mouse_y, /* can only be read */
+	sim_intparam_core_count, /* can only be read */
+	sim_intparam_work_thread_calc_time_ms,
+	sim_intparam_idle_fps,
+	sim_intparam_prox_sensor_select_down,
+	sim_intparam_prox_sensor_select_up,
+	sim_intparam_stop_request_counter,
+	sim_intparam_program_revision, /* Can only be read. See also sim_intparam_program_version */
+	sim_intparam_mouse_buttons, /* can only be read */
+	sim_intparam_dynamic_warning_disabled_mask,
+	sim_intparam_simulation_warning_disabled_mask,
+	sim_intparam_scene_index, /* can be used to switch to a different instance programmatically */
+	sim_intparam_motionplanning_seed,
+	sim_intparam_speedmodifier, /* can only be used while simulation is not stopped */
+	sim_intparam_dynamic_iteration_count
+};
+
+enum { /* uint64 parameters: */
+	sim_uint64param_simulation_time_step_ns=0, /* simulation time step in nanoseconds */
+	sim_uint64param_simulation_time_ns		/* simulation time in nanoseconds */
 };
 
 enum { /* Float parameters: */
 	sim_floatparam_rand=0, /* random value (0.0-1.0) */
-	sim_floatparam_simulation_time_step
+	sim_floatparam_simulation_time_step,
+	sim_floatparam_stereo_distance,
+	sim_floatparam_dynamic_step_size
 };
 
 enum { /* String parameters: */
-	sim_stringparam_application_path=0 /* path of V-REP's executable */
+	sim_stringparam_application_path=0, /* path of V-REP's executable */
+	sim_stringparam_video_filename, /* name + path without extension! */
+	sim_stringparam_app_arg1, /* specify those args with "vrep -gxxxx" */
+	sim_stringparam_app_arg2,
+	sim_stringparam_app_arg3,
+	sim_stringparam_app_arg4,
+	sim_stringparam_app_arg5,
+	sim_stringparam_app_arg6,
+	sim_stringparam_app_arg7,
+	sim_stringparam_app_arg8,
+	sim_stringparam_app_arg9,
+	sim_stringparam_additional_addonscript_firstscene, /* do not use. Can only be written. */
+	sim_stringparam_additional_addonscript, /* do not use. Can only be written. */
+	sim_stringparam_scene_path_and_name, /* can only be read */
+	sim_stringparam_scene_path, /* can only be read */
+	sim_stringparam_scene_name, /* can only be read */
+	sim_stringparam_remoteapi_temp_file_dir /* can only be read */
 };
 
 enum { /* Array parameters: */
@@ -541,68 +767,71 @@ enum { /* Array parameters: */
 	sim_arrayparam_fog_color,
 	sim_arrayparam_background_color1,
 	sim_arrayparam_background_color2,
-	sim_arrayparam_ambient_light
+	sim_arrayparam_ambient_light,
+	sim_arrayparam_random_euler
 };
 
 enum { /* User interface elements: */
-	sim_gui_menubar						=0x0001,
-	sim_gui_popups						=0x0002,
-	sim_gui_toolbar1					=0x0004,
-	sim_gui_toolbar2					=0x0008,
-	sim_gui_hierarchy					=0x0010,
-	sim_gui_infobar						=0x0020,
-	sim_gui_statusbar					=0x0040,
-	sim_gui_scripteditor				=0x0080,
-	sim_gui_scriptsimulationparameters	=0x0100,
-	sim_gui_dialogs						=0x0200,
-	sim_gui_browser						=0x0400,
-	sim_gui_all							=0xffff
+	sim_gui_menubar						=0x00001,
+	sim_gui_popups						=0x00002,
+	sim_gui_toolbar1					=0x00004,
+	sim_gui_toolbar2					=0x00008,
+	sim_gui_hierarchy					=0x00010,
+	sim_gui_infobar						=0x00020,
+	sim_gui_statusbar					=0x00040,
+	sim_gui_scripteditor				=0x00080,
+	sim_gui_scriptsimulationparameters	=0x00100,
+	sim_gui_dialogs						=0x00200,
+	sim_gui_browser						=0x00400,
+	sim_gui_all							=0x0ffff,
+	sim_gui_headless					=0x10000
 };
 
 enum { /* Joint modes: */
 	sim_jointmode_passive=0,
-	sim_jointmode_motion,
+	sim_jointmode_motion_deprecated,
 	sim_jointmode_ik,
-	sim_jointmode_ikdependent,
+	sim_jointmode_reserved_previously_ikdependent,
 	sim_jointmode_dependent,
 	sim_jointmode_force
 };
 
 enum { /* Navigation and selection modes with the mouse. Lower byte values are mutually exclusive, upper byte bits can be combined */
-	sim_navigation_passive					=0x0000,
-	sim_navigation_camerashift				=0x0001,
-	sim_navigation_camerarotate				=0x0002,
-	sim_navigation_camerazoom				=0x0003,
-	sim_navigation_cameratilt				=0x0004,
-	sim_navigation_cameraangle				=0x0005,
-	sim_navigation_camerafly				=0x0006,
-	sim_navigation_objectshift				=0x0007,
-	sim_navigation_objectrotate				=0x0008,
-	sim_navigation_reserved2				=0x0009,
-	sim_navigation_reserved3				=0x000A,
-	sim_navigation_jointpathtest			=0x000B,
-	sim_navigation_ikmanip					=0x000C,
-	sim_navigation_objectmultipleselection	=0x000D,
+	sim_navigation_passive					=0x000000,
+	sim_navigation_camerashift				=0x000001,
+	sim_navigation_camerarotate				=0x000002,
+	sim_navigation_camerazoom				=0x000003,
+	sim_navigation_cameratilt				=0x000004,
+	sim_navigation_cameraangle				=0x000005,
+	sim_navigation_camerafly				=0x000006,
+	sim_navigation_objectshift				=0x000007,
+	sim_navigation_objectrotate				=0x000008,
+	sim_navigation_reserved2				=0x000009,
+	sim_navigation_reserved3				=0x00000A,
+	sim_navigation_reserved4				=0x00000B,
+	sim_navigation_reserved5				=0x00000C,
+	sim_navigation_reserved6				=0x00000D,
 	/* Bit-combine following values and add them to one of above's values for a valid navigation mode: */
-	sim_navigation_reserved4				=0x0100,
-	sim_navigation_clickselection			=0x0200,
-	sim_navigation_ctrlselection			=0x0400,
-	sim_navigation_shiftselection			=0x0800,
-	sim_navigation_camerazoomwheel			=0x1000,
-	sim_navigation_camerarotaterightbutton	=0x2000
+	sim_navigation_createpathpoint			=0x000100,
+	sim_navigation_clickselection			=0x000200,
+	sim_navigation_ctrlselection			=0x000400,
+	sim_navigation_shiftselection			=0x000800,
+	sim_navigation_camerazoomwheel			=0x001000,
+	sim_navigation_camerarotaterightbutton	=0x002000, /* deprecated */
+	sim_navigation_camerarotatemiddlebutton	=0x002000
 };
 
 
 enum { /* Reflexxes Motion Library flags */
 	/* enable one of following: */
-	simrml_phase_sync_if_possible					=0x0000,	
-	simrml_only_time_sync							=0x0001,	
-	simrml_only_phase_sync							=0x0002,	
+	simrml_phase_sync_if_possible					=0x0000,
+	simrml_only_time_sync							=0x0001,
+	simrml_only_phase_sync							=0x0002,
 	simrml_no_sync									=0x0003,
 
 	/* enable one of following: */
-	simrml_keep_target_vel							=0x0000,	
-	simrml_recompute_trajectory						=0x0004,	
+	simrml_keep_target_vel							=0x0000,
+	simrml_recompute_trajectory						=0x0004,
 
 	/* enable any: */
 	simrml_disable_extremum_motion_states_calc		=0x0008,
@@ -632,15 +861,18 @@ enum { /* message box return values */
 	sim_msgbox_return_cancel=0,
 	sim_msgbox_return_no,
 	sim_msgbox_return_yes,
-	sim_msgbox_return_ok
+	sim_msgbox_return_ok,
+	sim_msgbox_return_error
 };
 
-enum { // physics engine:
+enum { /* physics engine */
 	sim_physics_bullet=0,
-	sim_physics_ode
+	sim_physics_ode,
+	sim_physics_vortex,
+	sim_physics_newton
 };
 
-enum { // pure primitives type:
+enum { /* pure primitives type */
 	sim_pure_primitive_none=0,
 	sim_pure_primitive_plane,
 	sim_pure_primitive_disc,
@@ -651,7 +883,7 @@ enum { // pure primitives type:
 	sim_pure_primitive_heightfield
 };
 
-enum { // dummy-dummy link types:
+enum { /* dummy-dummy link types */
 	sim_dummy_linktype_dynamics_loop_closure=0,
 	sim_dummy_linktype_dynamics_force_constraint,
 	sim_dummy_linktype_gcs_loop_closure,
@@ -661,14 +893,20 @@ enum { // dummy-dummy link types:
 	sim_dummy_linktype_reserved
 };
 
+enum { /* texture map modes (serialized) */
+	sim_texturemap_plane=0,
+	sim_texturemap_cylinder,
+	sim_texturemap_sphere,
+	sim_texturemap_cube
+};
 
-enum { // path planning types:
+enum { /* path planning types */
 	sim_pathplanning_holonomic=0,
 	sim_pathplanning_reserved,
 	sim_pathplanning_nonholonomic
 };
 
-enum { // Holonomic path planning types:
+enum { /* Holonomic path planning types */
 	sim_holonomicpathplanning_xy=0,		// 2 DoF
 	sim_holonomicpathplanning_xg,
 	sim_holonomicpathplanning_xyz,		// 3 DoF
@@ -680,13 +918,267 @@ enum { // Holonomic path planning types:
 	sim_holonomicpathplanning_xyzabg	// 6 Dof
 };
 
+enum { /* resource lock types */
+	sim_lock_ui_wants_to_read=0,
+	sim_lock_ui_wants_to_write,
+	sim_lock_nonui_wants_to_write
+};
+
+enum { /* color components */
+	sim_colorcomponent_ambient=0,
+	sim_colorcomponent_ambient_diffuse=0,
+	sim_colorcomponent_diffuse,
+	sim_colorcomponent_specular,
+	sim_colorcomponent_emission,
+	sim_colorcomponent_transparency,
+	sim_colorcomponent_auxiliary
+};
+
+enum { /* Pov pattern types */
+	sim_pov_pattern_null=0,
+	sim_pov_white_marble,
+	sim_pov_blood_marble,
+	sim_pov_blue_agate,
+	sim_pov_sapphire_agate,
+	sim_pov_brown_agate,
+	sim_pov_pink_granite,
+	sim_pov_pink_alabaster,
+	sim_pov_cherry_wood,
+	sim_pov_pine_wood,
+	sim_pov_dark_wood,
+	sim_pov_tan_wood,
+	sim_pov_white_wood,
+	sim_pov_tom_wood,
+	sim_pov_dmf_wood1,
+	sim_pov_dmf_wood2,
+	sim_pov_dmf_wood3,
+	sim_pov_dmf_wood4,
+	sim_pov_dmf_wood5,
+	sim_pov_dmf_wood6,
+	sim_pov_dmf_light_oak,
+	sim_pov_dmf_dark_oak,
+	sim_pov_emb_wood1,
+	sim_pov_yellow_pine,
+	sim_pov_rose_wood,
+	sim_pov_sandal_wood,
+	sim_pov_glass,
+	sim_pov_glass2,
+	sim_pov_glass3,
+	sim_pov_green_glass,
+	sim_pov_light_glass,
+	sim_pov_bold_glass,
+	sim_pov_wine_bottle,
+	sim_pov_beer_bottle,
+	sim_pov_ruby_glass,
+	sim_pov_blue_glass,
+	sim_pov_yellow_glass,
+	sim_pov_orange_glass,
+	sim_pov_vicks_bottle_glass,
+	sim_pov_chrome_metal,
+	sim_pov_brass_metal,
+	sim_pov_copper_metal,
+	sim_pov_bronze_metal,
+	sim_pov_silver_metal,
+	sim_pov_gold_metal,
+	sim_pov_polished_chrome,
+	sim_pov_polished_brass,
+	sim_pov_new_brass,
+	sim_pov_spun_brass,
+	sim_pov_brushed_aluminum,
+	sim_pov_silver1,
+	sim_pov_silver2,
+	sim_pov_silver3,
+	sim_pov_brass_valley,
+	sim_pov_rust,
+	sim_pov_rusty_iron,
+	sim_pov_soft_silver,
+	sim_pov_new_penny,
+	sim_pov_tinny_brass,
+	sim_pov_gold_nugget,
+	sim_pov_aluminum,
+	sim_pov_bright_bronze,
+	sim_pov_water,
+	sim_pov_cork,
+	sim_pov_lightning,
+	sim_pov_mirror
+};
+
+
+enum { /* Object int/float/string parameters */
+	/* scene objects */
+	sim_objintparam_visibility_layer= 10,
+	sim_objfloatparam_abs_x_velocity= 11,
+	sim_objfloatparam_abs_y_velocity= 12,
+	sim_objfloatparam_abs_z_velocity= 13,
+	sim_objfloatparam_abs_rot_velocity= 14,
+	sim_objfloatparam_objbbox_min_x= 15,
+	sim_objfloatparam_objbbox_min_y= 16,
+	sim_objfloatparam_objbbox_min_z= 17,
+	sim_objfloatparam_objbbox_max_x= 18,
+	sim_objfloatparam_objbbox_max_y= 19,
+	sim_objfloatparam_objbbox_max_z= 20,
+	sim_objfloatparam_modelbbox_min_x= 21,
+	sim_objfloatparam_modelbbox_min_y= 22,
+	sim_objfloatparam_modelbbox_min_z= 23,
+	sim_objfloatparam_modelbbox_max_x= 24,
+	sim_objfloatparam_modelbbox_max_y= 25,
+	sim_objfloatparam_modelbbox_max_z= 26,
+	sim_objintparam_collection_self_collision_indicator= 27,
+	sim_objfloatparam_transparency_offset= 28,
+	sim_objintparam_child_role= 29,
+	sim_objintparam_parent_role= 30,
+	sim_objintparam_manipulation_permissions= 31,
+	sim_objintparam_illumination_handle= 32,
+
+	sim_objparam_end= 999,
+
+	/* vision_sensors */
+	sim_visionfloatparam_near_clipping= 1000,
+	sim_visionfloatparam_far_clipping= 1001,
+	sim_visionintparam_resolution_x= 1002,
+	sim_visionintparam_resolution_y= 1003,
+	sim_visionfloatparam_perspective_angle= 1004,
+	sim_visionfloatparam_ortho_size= 1005,
+	sim_visionintparam_disabled_light_components= 1006,
+	sim_visionintparam_rendering_attributes= 1007,
+	sim_visionintparam_entity_to_render= 1008,
+	sim_visionintparam_windowed_size_x= 1009,
+	sim_visionintparam_windowed_size_y= 1010,
+	sim_visionintparam_windowed_pos_x= 1011,
+	sim_visionintparam_windowed_pos_y= 1012,
+	sim_visionintparam_pov_focal_blur= 1013,
+	sim_visionfloatparam_pov_blur_distance= 1014,
+	sim_visionfloatparam_pov_aperture= 1015,
+	sim_visionintparam_pov_blur_sampled= 1016,
+	sim_visionintparam_render_mode= 1017,
+
+	/* joints */
+	sim_jointintparam_motor_enabled= 2000,
+	sim_jointintparam_ctrl_enabled= 2001,
+	sim_jointfloatparam_pid_p= 2002,
+	sim_jointfloatparam_pid_i= 2003,
+	sim_jointfloatparam_pid_d= 2004,
+	sim_jointfloatparam_intrinsic_x= 2005,
+	sim_jointfloatparam_intrinsic_y= 2006,
+	sim_jointfloatparam_intrinsic_z= 2007,
+	sim_jointfloatparam_intrinsic_qx= 2008,
+	sim_jointfloatparam_intrinsic_qy= 2009,
+	sim_jointfloatparam_intrinsic_qz= 2010,
+	sim_jointfloatparam_intrinsic_qw= 2011,
+	sim_jointfloatparam_velocity= 2012,
+	sim_jointfloatparam_spherical_qx= 2013,
+	sim_jointfloatparam_spherical_qy= 2014,
+	sim_jointfloatparam_spherical_qz= 2015,
+	sim_jointfloatparam_spherical_qw= 2016,
+	sim_jointfloatparam_upper_limit= 2017,
+	sim_jointfloatparam_kc_k= 2018,
+	sim_jointfloatparam_kc_c= 2019,
+	sim_jointfloatparam_ik_weight= 2021,
+	sim_jointfloatparam_error_x= 2022,
+	sim_jointfloatparam_error_y= 2023,
+	sim_jointfloatparam_error_z= 2024,
+	sim_jointfloatparam_error_a= 2025,
+	sim_jointfloatparam_error_b= 2026,
+	sim_jointfloatparam_error_g= 2027,
+	sim_jointfloatparam_error_pos= 2028,
+	sim_jointfloatparam_error_angle= 2029,
+	sim_jointintparam_velocity_lock= 2030,
+	sim_jointintparam_vortex_dep_handle= 2031,
+	sim_jointfloatparam_vortex_dep_multiplication= 2032,
+	sim_jointfloatparam_vortex_dep_offset= 2033,
+
+	/* shapes */
+	sim_shapefloatparam_init_velocity_x= 3000,
+	sim_shapefloatparam_init_velocity_y= 3001,
+	sim_shapefloatparam_init_velocity_z= 3002,
+	sim_shapeintparam_static= 3003,
+	sim_shapeintparam_respondable= 3004,
+	sim_shapefloatparam_mass= 3005,
+	sim_shapefloatparam_texture_x= 3006,
+	sim_shapefloatparam_texture_y= 3007,
+	sim_shapefloatparam_texture_z= 3008,
+	sim_shapefloatparam_texture_a= 3009,
+	sim_shapefloatparam_texture_b= 3010,
+	sim_shapefloatparam_texture_g= 3011,
+	sim_shapefloatparam_texture_scaling_x= 3012,
+	sim_shapefloatparam_texture_scaling_y= 3013,
+	sim_shapeintparam_culling= 3014,
+	sim_shapeintparam_wireframe= 3015,
+	sim_shapeintparam_compound= 3016,
+	sim_shapeintparam_convex= 3017,
+	sim_shapeintparam_convex_check= 3018,
+	sim_shapeintparam_respondable_mask= 3019,
+	sim_shapefloatparam_init_velocity_a= 3020,
+	sim_shapefloatparam_init_velocity_b= 3021,
+	sim_shapefloatparam_init_velocity_g= 3022,
+	sim_shapestringparam_color_name= 3023,
+	sim_shapeintparam_edge_visibility= 3024,
+	sim_shapefloatparam_shading_angle= 3025,
+	sim_shapefloatparam_edge_angle= 3026,
+	sim_shapeintparam_edge_borders_hidden= 3027,
+
+	/* proximity sensors */
+	sim_proxintparam_ray_invisibility= 4000,
+
+	/* proximity sensors */
+	sim_forcefloatparam_error_x= 5000,
+	sim_forcefloatparam_error_y= 5001,
+	sim_forcefloatparam_error_z= 5002,
+	sim_forcefloatparam_error_a= 5003,
+	sim_forcefloatparam_error_b= 5004,
+	sim_forcefloatparam_error_g= 5005,
+	sim_forcefloatparam_error_pos= 5006,
+	sim_forcefloatparam_error_angle= 5007,
+
+	/* lights */
+	sim_lightintparam_pov_casts_shadows= 8000,
+
+	/* cameras */
+	sim_cameraintparam_disabled_light_components= 9000,
+	sim_camerafloatparam_perspective_angle= 9001,
+	sim_camerafloatparam_ortho_size= 9002,
+	sim_cameraintparam_rendering_attributes= 9003,
+	sim_cameraintparam_pov_focal_blur= 9004,
+	sim_camerafloatparam_pov_blur_distance= 9005,
+	sim_camerafloatparam_pov_aperture= 9006,
+	sim_cameraintparam_pov_blur_samples= 9007,
+
+	/* dummies */
+	sim_dummyintparam_link_type= 10000,
+
+	/* mirrors */
+	sim_mirrorfloatparam_width= 12000,
+	sim_mirrorfloatparam_height= 12001,
+	sim_mirrorfloatparam_reflectance= 12002,
+	sim_mirrorintparam_enable= 12003,
+
+	/* path planning */
+	sim_pplanfloatparam_x_min= 20000,
+	sim_pplanfloatparam_x_range= 20001,
+	sim_pplanfloatparam_y_min= 20002,
+	sim_pplanfloatparam_y_range= 20003,
+	sim_pplanfloatparam_z_min= 20004,
+	sim_pplanfloatparam_z_range= 20005,
+	sim_pplanfloatparam_delta_min= 20006,
+	sim_pplanfloatparam_delta_range= 20007,
+
+	/* motion planning */
+	sim_mplanintparam_nodes_computed= 25000,
+	sim_mplanintparam_prepare_nodes= 25001,
+	sim_mplanintparam_clear_nodes= 25002
+};
+
 /******************************************
 *******************************************
 Remote API constants:
 *******************************************
 *******************************************/
 
-#define SIMX_VERSION 0 
+#define SIMX_VERSION 10  /* max is 255!!! */
+/* version to 6 for release 3.1.2 */
+/* version to 7 for release 3.1.3 */
+/* version to 8 for release AFTER 3.1.3 */
+/* version to 10 for release AFTER 3.2.3. Added simxGetCollectionHandle and simxCallScriptFunction */
 
 /*
 Messages sent/received look like this:
@@ -711,7 +1203,7 @@ Messages sent/received look like this:
 #define simx_headeroffset_client_time 7		/* 1 simxInt. Client time stamp generated by the client (and sent back by the server) */
 #define simx_headeroffset_server_time 11	/* 1 simxInt. Generated by the server when a reply is generated. The server timestamp */
 #define simx_headeroffset_scene_id 15		/* 1 simxUShort. Generated by the server. A unique ID identifying the scene currently displayed */
-#define simx_headeroffset_server_state 17	/* 1 byte. Generated by the server. Bit coded: 0 set --> simulation not stopped, 1 set --> simulation paused, 2 set --> real-time switch on, 3-5: edit mode type (0=no edit mode, 1=triangle, 2=vertex, 3=edge, 4=path, 5=UI) */ 
+#define simx_headeroffset_server_state 17	/* 1 byte. Generated by the server. Bit coded: 0 set --> simulation not stopped, 1 set --> simulation paused, 2 set --> real-time switch on, 3-5: edit mode type (0=no edit mode, 1=triangle, 2=vertex, 3=edge, 4=path, 5=UI) */
 
 /* Remote API command header: */
 #define SIMX_SUBHEADER_SIZE 26
@@ -734,12 +1226,14 @@ enum {	simx_cmdnull_start				=0,
 		simx_cmd_get_last_errors,
 		simx_cmd_close_scene,
 		simx_cmd_get_object_selection,
-		simx_cmd_rml_position,
-		simx_cmd_rml_velocity,
+		simx_cmd_reserved1,
+		simx_cmd_reserved2,
+		simx_cmd_create_dummy,
+		simx_cmd_kill_connection,
 
 		simx_cmdnull_custom_start		=0x000800,
 
-		simx_cmd4bytes_start			=0x001000, 
+		simx_cmd4bytes_start			=0x001000,
 		/* from here on, commands are also identified by additional 4 bytes */
 		simx_cmd_get_joint_position,
 		simx_cmd_set_joint_position,
@@ -794,10 +1288,12 @@ enum {	simx_cmdnull_start				=0,
 		simx_cmd_spotcanbeused4,
 		simx_cmd_get_model_property,
 		simx_cmd_set_model_property,
+		simx_cmd_get_object_velocity,
+		simx_cmd_remove_model,
 
 		simx_cmd4bytes_custom_start	=0x001800,
 
-		simx_cmd8bytes_start			=0x002000, 
+		simx_cmd8bytes_start			=0x002000,
 		/* from here on, commands are also identified by additional 8 bytes */
 		simx_cmd_get_ui_slider,
 		simx_cmd_set_ui_slider,
@@ -810,6 +1306,9 @@ enum {	simx_cmdnull_start				=0,
 		simx_cmd_set_object_float_parameter,
 		simx_cmd_set_object_int_parameter,
 		simx_cmd_get_object_child,
+		simx_cmd_get_object_group_data,
+		simx_cmd_get_object_orientation2,
+		simx_cmd_get_object_position2,
 
 		simx_cmd8bytes_custom_start		=0x002800,
 
@@ -837,6 +1336,16 @@ enum {	simx_cmdnull_start				=0,
 		simx_cmd_set_integer_signal,
 		simx_cmd_set_string_signal,
 		simx_cmd_append_string_signal,
+		simx_cmd_write_string_stream=simx_cmd_append_string_signal,
+		simx_cmd_get_and_clear_string_signal,
+		simx_cmd_read_string_stream,
+		simx_cmd_get_collection_handle,
+
+		simx_cmd4bytes2strings_start			=0x003400,
+		/* from here on, commands are also identified by 4 additional bytes and 2 additional strings */
+		simx_cmd_call_script_function,
+
+		simx_cmd4bytes2strings_end				=0x003500,
 
 		simx_cmd1string_custom_start	=0x003800,
 
@@ -846,12 +1355,13 @@ enum {	simx_cmdnull_start				=0,
 
 		/* Regular operation modes */
 		simx_opmode_oneshot				=0x000000,		/* sends command as one chunk. Reply will also come as one chunk. Doesn't wait for the reply. */
-		simx_opmode_oneshot_wait		=0x010000,		/* sends command as one chunk. Reply will also come as one chunk. Waits for the reply (_REPLY_WAIT_TIMEOUT_IN_MS is the timeout). */
+		simx_opmode_blocking			=0x010000,		/* sends command as one chunk. Reply will also come as one chunk. Waits for the reply (_REPLY_WAIT_TIMEOUT_IN_MS is the timeout). */
+		simx_opmode_oneshot_wait		=0x010000,		/* same as simx_opmode_blocking */
 		simx_opmode_streaming			=0x020000,		/* sends command as one chunk. Command will be stored on the server and always executed (every x ms (as far as possible), where x can be 0-65535. just add x to simx_opmode_streaming). A reply will be sent continuously, each time as one chunk. Doesn't wait for the reply. */
 		simx_opmode_continuous			=0x020000,		/* same as simx_opmode_streaming */
 
 		/* Operation modes for heavy data */
-		simx_opmode_oneshot_split		=0x030000,		/* sends command as several chunks (max chunk size is x bytes, where x can be _MIN_SPLIT_AMOUNT_IN_BYTES-65535. Just add x to simx_opmode_oneshot_split). Reply will also come as several chunks. Doesn't wait for the reply. */	 
+		simx_opmode_oneshot_split		=0x030000,		/* sends command as several chunks (max chunk size is x bytes, where x can be _MIN_SPLIT_AMOUNT_IN_BYTES-65535. Just add x to simx_opmode_oneshot_split). Reply will also come as several chunks. Doesn't wait for the reply. */
 		simx_opmode_streaming_split		=0x040000,		/* sends command as several chunks (max chunk size is x bytes, where x can be _MIN_SPLIT_AMOUNT_IN_BYTES-65535. Just add x to simx_opmode_streaming_split). Command will be stored on the server and always executed. A reply will be sent continuously, each time as several chunks. Doesn't wait for the reply. */
 		simx_opmode_continuous_split	=0x040000,		/* same as simx_opmode_streaming_split */
 
@@ -861,15 +1371,26 @@ enum {	simx_cmdnull_start				=0,
 		simx_opmode_remove				=0x070000		/* doesn't send anything and doesn't return any specific value. It just erases a similar command reply in the inbox (to free some memory) */
 };
 
-/* Command error codes */
+/* Command return codes (bit-coded) */
+enum {	simx_return_ok						=0x000000,
+		simx_return_novalue_flag			=0x000001,		/* input buffer doesn't contain the specified command. Maybe you forgot to enable data streaming, or streaming hasn't started yet */
+		simx_return_timeout_flag			=0x000002,		/* command reply not received in time for simx_opmode_blocking operation mode */
+		simx_return_illegal_opmode_flag		=0x000004,		/* command doesn't support the specified operation mode */
+		simx_return_remote_error_flag		=0x000008,		/* command caused an error on the server side */
+		simx_return_split_progress_flag		=0x000010,		/* previous similar command not yet fully processed (applies to simx_opmode_oneshot_split operation modes) */
+		simx_return_local_error_flag		=0x000020,		/* command caused an error on the client side */
+		simx_return_initialize_error_flag	=0x000040		/* simxStart was not yet called */
+};
+
+/* Following only for backward compatibility, but equivalent to above return values */
 enum {	simx_error_noerror					=0x000000,
-		simx_error_novalue_flag				=0x000001,		/* input buffer doesn't contain the specified command */
-		simx_error_timeout_flag				=0x000002,		/* command reply not received in time for simx_opmode_oneshot_wait operation mode */
-		simx_error_illegal_opmode_flag		=0x000004,		/* command doesn't support the specified operation mode */
-		simx_error_remote_error_flag		=0x000008,		/* command caused an error on the server side */
-		simx_error_split_progress_flag		=0x000010,		/* previous similar command not yet fully processed (applies to simx_opmode_oneshot_split operation modes) */
-		simx_error_local_error_flag			=0x000020,		/* command caused an error on the client side */
-		simx_error_initialize_error_flag	=0x000040		/* simxStart was not yet called */
+		simx_error_novalue_flag				=0x000001,
+		simx_error_timeout_flag				=0x000002,
+		simx_error_illegal_opmode_flag		=0x000004,
+		simx_error_remote_error_flag		=0x000008,
+		simx_error_split_progress_flag		=0x000010,
+		simx_error_local_error_flag			=0x000020,
+		simx_error_initialize_error_flag	=0x000040
 };
 
 
@@ -887,12 +1408,13 @@ enum {	simros_strmcmdnull_start				=0,
 		simros_strmcmd_get_object_selection,
 		simros_strmcmd_get_info, // do not use. Is streamed anyway with topic name "info"
 
-		simros_strmcmdnull_subscriber_start			=0x000800, 
+		simros_strmcmdnull_subscriber_start			=0x000800,
 		simros_strmcmd_add_status_bar_message,
 		simros_strmcmd_set_object_selection,
 		simros_strmcmd_set_joint_state,
 
-		simros_strmcmdint_start			=0x001000, 
+
+		simros_strmcmdint_start			=0x001000,
 		/* from here on, commands are also identified by 1 additional int */
 		simros_strmcmd_get_array_parameter,
 		simros_strmcmd_get_boolean_parameter,
@@ -912,8 +1434,12 @@ enum {	simros_strmcmdnull_start				=0,
 		simros_strmcmd_read_proximity_sensor,
 		simros_strmcmd_read_vision_sensor,
 		simros_strmcmd_get_vision_sensor_info,
+		simros_strmcmd_get_range_finder_data,
+		simros_strmcmd_get_laser_scanner_data,
+		simros_strmcmd_get_odom_data,
+		simros_strmcmd_get_depth_sensor_data,
 
-		simros_strmcmdint_subscriber_start			=0x001800, 
+		simros_strmcmdint_subscriber_start			=0x001800,
 		simros_strmcmd_auxiliary_console_print,
 		simros_strmcmd_set_array_parameter,
 		simros_strmcmd_set_boolean_parameter,
@@ -924,8 +1450,11 @@ enum {	simros_strmcmdnull_start				=0,
 		simros_strmcmd_set_joint_target_position,
 		simros_strmcmd_set_joint_target_velocity,
 		simros_strmcmd_set_vision_sensor_image,
+		simros_strmcmd_set_joy_sensor,
+		simros_strmcmd_set_twist_command,
 
-		simros_strmcmdintint_start			=0x002000, 
+
+		simros_strmcmdintint_start			=0x002000,
 		/* from here on, commands are also identified by 2 additional ints */
 		simros_strmcmd_get_object_pose,
 		simros_strmcmd_get_object_float_parameter,
@@ -933,8 +1462,9 @@ enum {	simros_strmcmdnull_start				=0,
 		simros_strmcmd_get_ui_button_property,
 		simros_strmcmd_get_ui_slider,
 		simros_strmcmd_get_transform,
+		simros_strmcmd_get_object_group_data,
 
-		simros_strmcmdintint_subscriber_start			=0x002800, 
+		simros_strmcmdintint_subscriber_start			=0x002800,
 		simros_strmcmd_set_object_float_parameter,
 		simros_strmcmd_set_object_int_parameter,
 		simros_strmcmd_set_object_pose,
@@ -950,23 +1480,27 @@ enum {	simros_strmcmdnull_start				=0,
 		simros_strmcmd_get_float_signal,
 		simros_strmcmd_get_integer_signal,
 		simros_strmcmd_get_string_signal,
-		simros_strmcmd_get_range_finder_data,
+		simros_strmcmd_reserved1,
+		simros_strmcmd_get_and_clear_string_signal,
 
-		simros_strmcmdstring_subscriber_start			=0x003800, 
+		simros_strmcmdstring_subscriber_start			=0x003800,
 		simros_strmcmd_clear_float_signal,
 		simros_strmcmd_clear_integer_signal,
 		simros_strmcmd_clear_string_signal,
 		simros_strmcmd_set_float_signal,
 		simros_strmcmd_set_integer_signal,
 		simros_strmcmd_set_string_signal,
-		simros_strmcmd_set_twist_command,
+		simros_strmcmd_reserved2,
 		simros_strmcmd_append_string_signal,
+		simros_strmcmd_set_joint_trajectory,
 
 		simros_strmcmdintstring_start			=0x004000,
 		/* from here on, commands are also identified by one additional int and one additional string */
 		simros_strmcmd_get_twist_status,
+		simros_strmcmd_receive_data_from_script_function,
 
-		simros_strmcmdintstring_subscriber_start			=0x004800, 
+		simros_strmcmdintstring_subscriber_start			=0x004800,
+		simros_strmcmd_send_data_to_script_function,
 
 
 		simros_strmcmdreserved_start			=0x005000,
