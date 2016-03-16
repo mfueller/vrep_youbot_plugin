@@ -5,7 +5,7 @@ Installation
 --
 
 1) Install youBot ROS packages
-- e.g.  $ sudo apt-get install ros-hydro-youbot-driver-ros-interface
+- e.g.  $ sudo apt-get install ros-indigo-youbot-driver-ros-interface
 
 2) Install v-rep (http://www.v-rep.eu/) into i.e. /opt/v-rep
 
@@ -22,7 +22,7 @@ Installation
 
 6) copy the compiled libraries libv_repExtyouBot.so and libv_repExtRos.so into your /opt/v-rep directory
 
-    $ sudo cp ~/catkin_ws/devel/libv_repExt* /opt/v-rep
+    $ sudo cp ~/catkin_ws/devel/lib/libv_repExt* /opt/v-rep
 
 Usage
 --
