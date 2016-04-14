@@ -77,8 +77,8 @@ src/ros/pluglet/ClockPluglet.cpp
 src/ros/callback/LaserScanCallback.cpp
 src/ros/pluglet/LaserScanPluglet.cpp
 
-#src/ros/callback/PointCloudCallback.cpp
-#src/ros/pluglet/PointCloudPluglet.cpp
+src/ros/callback/PointCloudCallback.cpp
+src/ros/pluglet/PointCloudPluglet.cpp
 
 src/ros/callback/JointControlCallback.cpp
 src/ros/pluglet/JointControlPluglet.cpp
@@ -88,7 +88,7 @@ src/ros/pluglet/SwedishBaseControllerPluglet.cpp
 
 )
 
-add_dependencies(v_repExtRosSkeleton ${catkin_EXPORTED_TARGETS})
+add_dependencies(v_repExtyouBot ${catkin_EXPORTED_TARGETS})
 target_link_libraries(v_repExtyouBot
     pthread
     dl
