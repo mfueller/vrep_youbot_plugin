@@ -8,24 +8,32 @@ project(vrep_youbot_plugin)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC") 
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -D__linux") 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -D__linux")
 
-find_package(catkin REQUIRED brics_actuator)
+find_package(catkin REQUIRED COMPONENTS  roscpp brics_actuator)
+#Find PCL 1.7
 find_package(PCL 1.7 REQUIRED)
-#LIBRARIES v_repExtyouBot
-
-#generate_messages(DEPENDENCIES brics_actuator)
+include_directories(BEFORE ${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+if (NOT PCL_FOUND)
+    MESSAGE(FATAL_ERROR "PCL not found.\n")
+endif (NOT PCL_FOUND)
 
 catkin_package(
-               CATKIN_DEPENDS roscpp rosconsole std_msgs geometry_msgs sensor_msgs cv_bridge tf brics_actuator roslib geometry_msgs
-               DEPENDS opencv pthread dl PCL roscpp rosconsole)
+               CATKIN_DEPENDS roscpp rosconsole std_msgs roslib brics_actuator cv_bridge tf geometry_msgs sensor_msgs
+               DEPENDS roscpp rosconsole std_msgs roslib brics_actuator libpcl libopencv python-opencv pthread dl)
 
-
+#include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 message("catkin Include DIRS" ${catkin_INCLUDE_DIRS})
 message("PCL Include DIRS" ${PCL_INCLUDE_DIRS})
 message("Catkin Libs: " ${catkin_LIBRARIES})
+
+#link_directories("/opt/ros/groovy/lib")
+link_directories("/opt/ros/indigo/lib")
+#link_directories("/opt/ros/hydro/lib")
 
 
 #uncomment if you have defined messages
@@ -51,9 +59,8 @@ add_library(
 #add_executable(
 v_repExtyouBot
 
-src/v_repExtyouBot.cpp 
-src/v_repLib.cpp 
-
+src/v_repExtyouBot.cpp
+src/v_repLib.cpp
 
 src/lua/GenericLuaFunctionRegistry.cpp
 src/lua/GenericLuaCallback.cpp
@@ -70,19 +77,27 @@ src/ros/pluglet/ClockPluglet.cpp
 src/ros/callback/LaserScanCallback.cpp
 src/ros/pluglet/LaserScanPluglet.cpp
 
-#src/ros/callback/PointCloudCallback.cpp
-#src/ros/pluglet/PointCloudPluglet.cpp
+src/ros/callback/PointCloudCallback.cpp
+src/ros/pluglet/PointCloudPluglet.cpp
 
 src/ros/callback/JointControlCallback.cpp
 src/ros/pluglet/JointControlPluglet.cpp
 
 src/ros/callback/SwedishBaseControllerCallback.cpp
 src/ros/pluglet/SwedishBaseControllerPluglet.cpp
-) 
 
-target_link_libraries(v_repExtyouBot 
+)
+
+add_dependencies(v_repExtyouBot ${catkin_EXPORTED_TARGETS})
+target_link_libraries(v_repExtyouBot
     pthread
     dl
+    roslib
+    rosconsole
+    rostime
+    rospack
+    roscpp_serialization
+    roscpp
     boost_system
-    ${catkin_LIBRARIES}
+   ${catkin_LIBRARIES}
 )
