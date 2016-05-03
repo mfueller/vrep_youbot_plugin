@@ -122,8 +122,7 @@ void JointControlPluglet::velocityCallback(
 				simSetObjectIntParameter(handle, 2001, 0);
 				simSetObjectIntParameter(handle, 1000, 1);
 
-				simSetJointTargetVelocity(handle,
-					msg.velocities[i].value);
+				simSetJointTargetVelocity(handle, static_cast<float>(msg.velocities[i].value));
 			}
 		}
 	}
