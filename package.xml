@@ -11,16 +11,22 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>brics_actuator</build_depend>
   <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>perception_pcl</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>vrep_commons</build_depend>
+  <build_depend>vrep_plugin</build_depend>
+  
 
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>rosconsole</run_depend>
   <run_depend>roslib</run_depend>
+
   <run_depend>brics_actuator</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>tf</run_depend>
@@ -31,4 +37,8 @@
   <run_depend>python-opencv</run_depend>
   <run_depend>pthread</run_depend>
   <run_depend>dl</run_depend>
+
+  <run_depend>vrep_commons</run_depend>
+  <run_depend>vrep_plugin</run_depend>
+
 </package>

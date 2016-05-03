@@ -12,6 +12,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -D__linux")
 
 find_package(catkin REQUIRED COMPONENTS  roscpp brics_actuator)
+
 #Find PCL 1.7
 find_package(PCL 1.7 REQUIRED)
 include_directories(BEFORE ${PCL_INCLUDE_DIRS})
@@ -21,9 +22,23 @@ if (NOT PCL_FOUND)
     MESSAGE(FATAL_ERROR "PCL not found.\n")
 endif (NOT PCL_FOUND)
 
+
+
 catkin_package(
                CATKIN_DEPENDS roscpp rosconsole std_msgs roslib brics_actuator cv_bridge tf geometry_msgs sensor_msgs
                DEPENDS roscpp rosconsole std_msgs roslib brics_actuator libpcl libopencv python-opencv pthread dl)
+#=======
+#find_package(catkin REQUIRED brics_actuator sensor_msgs)
+#find_package(PCL 1.7 REQUIRED)
+##LIBRARIES v_repExtyouBot
+
+#generate_messages(DEPENDENCIES sensor_msgs brics#_actuator vrep_common)
+
+#catkin_package(
+#               CATKIN_DEPENDS roscpp rosconsole std_msgs geometry_msgs sensor_msgs cv_bridge tf brics_actuator roslib vrep_commons vrep_plugin
+#               DEPENDS opencv pthread dl PCL roscpp rosconsole)
+
+#>>>>>>> Stashed changes
 
 #include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
@@ -32,8 +47,9 @@ message("PCL Include DIRS" ${PCL_INCLUDE_DIRS})
 message("Catkin Libs: " ${catkin_LIBRARIES})
 
 #link_directories("/opt/ros/groovy/lib")
-link_directories("/opt/ros/indigo/lib")
+#link_directories("/opt/ros/indigo/lib")
 #link_directories("/opt/ros/hydro/lib")
+link_directories("/opt/ros/jade/lib")
 
 
 #uncomment if you have defined messages
